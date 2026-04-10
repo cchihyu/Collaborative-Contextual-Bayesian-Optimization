@@ -246,6 +246,9 @@ def train_gp_surrogate(x_list, c_list, y_list):
     fit_gpytorch_model(mll)
     return model
 
+##########
+# Below implement the simulation functions
+##########
 
 def levy(x: torch.Tensor, c: torch.Tensor) -> torch.Tensor:
 
@@ -477,7 +480,7 @@ def considered_optimal_regret_seq(model, f_k, client_max_y_k, normalizing_const_
     return decrease_list
 
 
-import torch
+# utility function for rff approxiimation
 
 def create_shared_rff_basis(input_dim, num_features=1000, lengthscale=1.0, outputscale=1.0, seed=42):
     """Create and save a shared RFF basis (W, b)."""
