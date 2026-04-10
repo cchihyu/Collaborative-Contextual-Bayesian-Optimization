@@ -58,6 +58,7 @@ def evaluate_c(args):
     x_star, val = optimize_posterior_sample(model, x_mu, c, x_dim)
     return val.item(), c, x_star.squeeze(0)
 
+# main experiment function
 class FederatedThompsonSampler:
     def __init__(self, f, x_dim, c_dim, K, T, t_0, f_ks, seed=42):
         self.f_ks = f_ks
@@ -120,7 +121,8 @@ class FederatedThompsonSampler:
             self.x_cal,
             self.c_cal
         )
-        
+
+    # compute the context-specific optimal design
     def run_optimal(self):
         optimal_reg = []
         for k in range(self.K):
@@ -134,7 +136,7 @@ class FederatedThompsonSampler:
             self.c_cal))
         return [sum(seq[j] for seq in optimal_reg if len(seq) > j) / sum(len(seq) > j for seq in optimal_reg) for j in range(20*(self.c_dim+self.x_dim))]
 
-    
+    # run independent MTS (offline contextual Bayesian optimization)
     def run_indep(self):
         for t in trange(self.t_0 + 1, self.T + 1, desc="Running FMTS_indep"):
             for k in range(self.K):    
@@ -155,7 +157,8 @@ class FederatedThompsonSampler:
                 self.client_Dy[k].append(y_t)
 
         return self._collect_results()
-
+    
+    # run random sampling
     def run_rand(self):
         for t in trange(self.t_0 + 1, self.T + 1, desc="Running FMTS_rand"):
 
@@ -173,7 +176,7 @@ class FederatedThompsonSampler:
 
         return self._collect_results()
 
-    
+    # the proposed method
     def run_fd(self):
         for t in trange(self.t_0 + 1, self.T + 1, desc="Running FMTS_fd"):
             proposed_x = []
@@ -232,7 +235,7 @@ class FederatedThompsonSampler:
                 
         return self._collect_results()
 
-
+    # the proposed method with rff approximation
     def run_fd_rff(self):
         for t in trange(self.t_0 + 1, self.T + 1, desc="Running FMTS_fd"):
             W_shared, b_shared = create_shared_rff_basis(input_dim=(self.c_dim+self.x_dim), num_features=1000, seed=42)
@@ -291,7 +294,8 @@ class FederatedThompsonSampler:
                 self.client_Dy[k].append(y_t)
                 
         return self._collect_results()
-
+    
+    # benchmark method Fedarated thompson sampling   
     def run_fts(self):
         for t in trange(self.t_0 + 1, self.T + 1, desc="Running FMTS_fts"):
             proposed_x = []
